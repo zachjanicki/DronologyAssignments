@@ -124,6 +124,78 @@ def state_out_work(dronology, vehicles):
             dronology.send(state_str)
 
         time.sleep(1.0)
+        
+
+# Returns line segment offset d units from given line
+def offset(line, d):
+    p, q = line
+    x1 = p[0]
+    x2 = q[0]
+    y1 = p[1]
+    y2 = q[1]
+    dx = (x2-x1)*d
+    dy = (y2-y1)*d
+    return ((x1-dy, y1+dx),(x2-dy, y2+dx))
+
+# Returns whether intersection occurs within distance of two lines
+# Creates paralell line segments offset from two routes and checks for intersections
+def will_collide(line1, line2):
+    
+    distance = 0.01
+    
+    l1_upper_bound = offset(line1, distance)
+    l1_lower_bound = offset(line1, -distance)
+    l2_upper_bound = offset(line2, distance)
+    l2_lower_bound = offset(line2, -distance)
+
+    if intersection(l1_upper_bound, l2_upper_bound):
+        return True
+    elif intersection(l1_upper_bound, l2_lower_bound):
+        return True
+    elif intersection(l1_lower_bound, l2_upper_bound):
+        return True
+    elif intersection(l1_lower_bound, l2_lower_bound):
+        return True
+    else:
+        return False
+    
+# Returns whether or not intersection exists between line segments
+def intersection(line1, line2): 
+    
+    pt1, pt2 = line1
+    ptA, ptB = line2
+    
+    DET_TOLERANCE = 0.00000001
+
+    # the first line is pt1 + r*(pt2-pt1)
+    # in component form:
+    x1, y1 = pt1;   x2, y2 = pt2
+    dx1 = x2 - x1;  dy1 = y2 - y1
+
+    # the second line is ptA + s*(ptB-ptA)
+    x, y = ptA;   xB, yB = ptB;
+    dx = xB - x;  dy = yB - y;
+
+    DET = (-dx1 * dy + dy1 * dx)
+
+    if math.fabs(DET) < DET_TOLERANCE:
+        # return (0,0,0,0,0)
+        return False
+
+    # now, the determinant should be OK
+    DETinv = 1.0/DET
+
+    # find the scalar amount along the "self" segment
+    r = DETinv * (-dy  * (x-x1) +  dx * (y-y1))
+
+    # find the scalar amount along the input line
+    s = DETinv * (-dy1 * (x-x1) + dx1 * (y-y1))
+
+    # return the average of the two descriptions
+    xi = (x1 + r*dx1 + x + s*dx)/2.0
+    yi = (y1 + r*dy1 + y + s*dy)/2.0
+    # return ( xi, yi, 1, r, s )
+    return True
 
 
 def main(path_to_config, ardupath=None):
@@ -234,17 +306,25 @@ def main(path_to_config, ardupath=None):
        waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
        vehicles[vindex].simple_goto(waypoint, groundspeed=10)
 
-
    waypointindex +=1 
 
     #   3. Hopefully avoids collisions!
-
-
-
-
-    # You're encouraged to restructure this code as necessary to fit your own design.
-    # Hopefully it's flexible enough to support whatever ideas you have in mind.
-
+    
+    for vehicle in vehicles:
+        v1_curr = (vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon)
+        v1_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+        v1 = (v1_curr, v1_goto)
+        
+        for colliding_vehicle in vehicles:
+            v2_curr = (colliding_vehicle.location.global_relative_frame.lat, colliding_vehicle.location.global_relative_frame.lon)
+            v2_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+            v2 = (v2_curr, v2_goto)
+            
+            if will_collide(v1, v2):
+                print "Waiting for colliding vehicle to reach waypoint"
+            else:
+                print "Descending / ascending to target alt"
+        
 
     # wait until ctrl c to exit
     while DO_CONT:
