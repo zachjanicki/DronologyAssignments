@@ -142,7 +142,7 @@ def offset(line, d):
 # Creates paralell line segments offset from two routes and checks for intersections
 def will_collide(line1, line2):
     
-    distance = 0.01
+    distance = 0.000001
     
     l1_upper_bound = offset(line1, distance)
     l1_lower_bound = offset(line1, -distance)
