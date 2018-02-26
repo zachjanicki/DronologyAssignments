@@ -55,7 +55,7 @@ def sort_by_height(vehicles, routes, index):
 
     for vroute in routes:
         lat, lon, alt = vroute[index]
-        altitude_list.append(vindex, alt) # list of altitudes for indexed
+        altitude_list.append((vindex, alt)) # list of altitudes for indexed
         # waypoint 
         vindex += 1
 
