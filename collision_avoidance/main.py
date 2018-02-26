@@ -9,6 +9,7 @@ import time
 import signal
 import util
 import logging
+import math
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.INFO)
@@ -26,7 +27,6 @@ DO_CONT = False
 ARDUPATH = os.path.join('/', 'home', 'michael', 'git', 'ardupilot')
 
 R = 6373.0
-
 
 
 def get_distance_meters(lat1, long1, lat2, long2):
