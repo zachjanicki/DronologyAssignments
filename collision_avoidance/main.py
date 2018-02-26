@@ -24,6 +24,26 @@ DO_CONT = False
 # make sure you change this so that it's correct for your system 
 ARDUPATH = os.path.join('/', 'home', 'bayley', 'git', 'ardupilot')
 
+R = 6373.0
+
+
+
+def get_distance_meters(lat1, long1, lat2, long2):
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
+    long1 = radians(long1)
+    long2 = radians(long2)
+
+    dlong = long2 - long1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlong / 2)**2
+
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c * 1000
+    return distance
+
 
 def load_json(path2file):
     d = None
@@ -134,7 +154,42 @@ def main(path_to_config, ardupath=None):
     # At this point, all of the "behind the scenes stuff" has been set up.
     # It's time to write some code that:
     #   1. Starts up the drones (set the mode to guided, arm, takeoff)
+
+    for vehicle in vehicles:
+        print("Starting vehicle {}".format(vehicle))
+        starting_altitude = 20 # unsure about this number
+        print("Basic pre-arm checks")
+        while not vehicle.is_armable:
+            print(" Waiting for vehicle to initialise...")
+            time.sleep(1)
+
+        print("Arming motors")
+        # Copter should arm in GUIDED mode
+        vehicle.mode = VehicleMode("GUIDED")
+        vehicle.armed = True
+
+        # Confirm vehicle armed before attempting to take off
+        while not vehicle.armed:
+            print(" Waiting for arming...")
+            time.sleep(1)
+
+        print("Taking off!")
+        vehicle.simple_takeoff(starting_altitude)  # Take off to target altitude
+
+        # Wait until the vehicle reaches a safe height before processing the goto
+        #  (otherwise the command after Vehicle.simple_takeoff will execute
+        #   immediately).
+        while True:
+            print(" Altitude: ", vehicle.location.global_relative_frame.alt)
+            # Break and return from function just below target altitude.
+            if vehicle.location.global_relative_frame.alt >= starting_altitude * 0.95:
+                print("Reached target altitude")
+                break
+            time.sleep(1)
+
     #   2. Sends the drones to their waypoints
+
+
     #   3. Hopefully avoids collisions!
 
 
