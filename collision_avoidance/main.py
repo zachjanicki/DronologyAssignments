@@ -22,7 +22,7 @@ _LOG.addHandler(fh)
 DO_CONT = False
 
 # make sure you change this so that it's correct for your system 
-ARDUPATH = os.path.join('/', 'home', 'bayley', 'git', 'ardupilot')
+ARDUPATH = os.path.join('/', 'home', 'michael', 'git', 'ardupilot')
 
 R = 6373.0
 
@@ -274,7 +274,7 @@ def main(path_to_config, ardupath=None):
 
         print("Arming motors")
         # Copter should arm in GUIDED mode
-        vehicle.mode = VehicleMode("GUIDED")
+        vehicle.mode = "GUIDED"
         vehicle.armed = True
 
         # Confirm vehicle armed before attempting to take off
