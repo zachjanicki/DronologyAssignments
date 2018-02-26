@@ -31,10 +31,10 @@ R = 6373.0
 
 
 def get_distance_meters(lat1, long1, lat2, long2):
-    lat1 = radians(lat1)
-    lat2 = radians(lat2)
-    long1 = radians(long1)
-    long2 = radians(long2)
+    lat1 = radians(float(lat1))
+    lat2 = radians(float(lat2))
+    long1 = radians(float(long1))
+    long2 = radians(float(long2))
 
     dlong = long2 - long1
     dlat = lat2 - lat1
@@ -327,7 +327,7 @@ def main(path_to_config, ardupath=None):
                     print "Descending / ascending to target alt"
                     go_to_altitude(target_altitude, vehicle)
                 else:
-                    if get_distance_meters(v1_curr,v1_goto,v2_curr,v2_goto) > 20:
+                    if get_distance_meters(v1_curr[0],v1_curr[1],v2_curr[0],v2_curr[1]) > 20:
                         print "Descending / ascending if not too close"
                         go_to_altitude(target_altitude, vehicle)
                     else:
