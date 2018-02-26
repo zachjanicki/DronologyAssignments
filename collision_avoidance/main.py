@@ -72,12 +72,12 @@ def go_to_altitude(alt, vehicle):
     # get the current location, so when we move we just change altitudes
     lat = vehicle.location.global_relative_frame.lat
     lon = vehicle.location.global_relative_frame.lon
-    newpoint=LocationGlobalRelative(lat, lon, alt)
+    newpoint = LocationGlobalRelative(lat, lon, alt)
     vehicle.simple_goto(newpoint, groundspeed=10)
     # check that we made it to a safe height
     while True:
         currheight = vehicle.location.global_relative_frame.alt
-        if currheight > newpoint * 0.95 and currheight < newpoint * 1.05:
+        if currheight > alt * 0.95 and currheight < alt * 1.05:
 		print("Reached target altitude")
                 break
         time.sleep(1)
