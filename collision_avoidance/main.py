@@ -274,7 +274,7 @@ def main(path_to_config, ardupath=None):
 
         print("Arming motors")
         # Copter should arm in GUIDED mode
-        vehicle.mode = "GUIDED"
+        vehicle.mode = dronekit.VehicleMode("GUIDED")
         vehicle.armed = True
 
         # Confirm vehicle armed before attempting to take off
