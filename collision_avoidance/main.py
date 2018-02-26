@@ -68,7 +68,7 @@ def sort_by_height(vehicles, routes, index):
         newalt = 20 + i*(20 / drone_count)
         go_to_altitude(newalt, vehicles[d_id])
 
-def go_to_altitude(self, alt, vehicle):
+def go_to_altitude(alt, vehicle):
     # get the current location, so when we move we just change altitudes
     lat = vehicle.location.global_relative_frame.lat
     lon = vehicle.location.global_relative_frame.lon
@@ -296,35 +296,43 @@ def main(path_to_config, ardupath=None):
                 break
             time.sleep(1)
 
-    #   2. Sends the drones to their waypoints
    # end the loop above (for v in vehicles)
 
-    waypointindex = 0
-    sort_by_height(vehicles, routes, waypointindex)
-    for vindex in range(len(vehicles)):
-        lat, lon, alt = routes[vindex][waypointindex] 
-        waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
-        vehicles[vindex].simple_goto(waypoint, groundspeed=10)
-
-    waypointindex +=1 
-
-    #   3. Hopefully avoids collisions!
-    
-    for vehicle in vehicles:
-        v1_curr = (vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon)
-        v1_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
-        v1 = (v1_curr, v1_goto)
+    # For each set of waypoints
+    for waypointindex in range(0, 5):
         
-        for colliding_vehicle in vehicles:
-            v2_curr = (colliding_vehicle.location.global_relative_frame.lat, colliding_vehicle.location.global_relative_frame.lon)
-            v2_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
-            v2 = (v2_curr, v2_goto)
-            
-            if will_collide(v1, v2):
-                print "Waiting for colliding vehicle to reach waypoint"
-            else:
-                print "Descending / ascending to target alt"
+        sort_by_height(vehicles, routes, waypointindex)
         
+        # Send each drone to it next waypoint
+        for vindex in range(len(vehicles)):
+            lat, lon, alt = routes[vindex][waypointindex] 
+            waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
+            vehicles[vindex].simple_goto(waypoint, groundspeed=10)
+        
+        # Check if collisions occur
+        for vehicle in vehicles:
+            v1_curr = (vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon)
+            v1_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+            v1 = (v1_curr, v1_goto)
+            target_altitude = routes[vehicle][waypointindex][2]
+
+            for colliding_vehicle in vehicles:
+                v2_curr = (colliding_vehicle.location.global_relative_frame.lat, colliding_vehicle.location.global_relative_frame.lon)
+                v2_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+                v2 = (v2_curr, v2_goto)
+                
+                if not will_collide(v1, v2):
+                    print "Descending / ascending to target alt"
+                    go_to_altitude(target_altitude, vehicle)
+                else:
+                    if get_distance_meters(v1_curr,v1_goto,v2_curr,v2_goto) > 20:
+                        print "Descending / ascending if not too close"
+                        go_to_altitude(target_altitude, vehicle)
+                    else:
+                        print "Waiting for drone to pass"
+                        time.sleep(20.0)
+                        go_to_altitude(target_altitude, vehicle)
+
 
     # wait until ctrl c to exit
     while DO_CONT:
