@@ -44,6 +44,43 @@ def get_distance_meters(lat1, long1, lat2, long2):
     distance = R * c * 1000
     return distance
 
+# take the second element of a list. used when sorting our drones
+def take_second(l):
+    return l[1]
+
+def sort_by_height(vehicles, routes, index):
+    altitude_list = []
+    vindex = 0 # drone number we're looking at
+    drone_count = len(vehicles)
+
+    for vroute in routes:
+        lat, lon, alt = vroute[index]
+        altitude_list.append(vindex, alt) # list of altitudes for indexed
+        # waypoint 
+        vindex += 1
+
+    # sort by altitude
+    altitude_list = sorted(altitude_list, key=take_second)
+
+    # iterate through the list again and tell each drone to go to a new alt
+    for i in range(len(altitude_list)):
+        d_id, alt = altitude_list[i]
+        newalt = 20 + i*(20 / drone_count)
+        go_to_altitude(newalt, vehicles[d_id])
+
+def go_to_altitude(self, alt, vehicle):
+    # get the current location, so when we move we just change altitudes
+    lat = vehicle.location.global_relative_frame.lat
+    lon = vehicle.location.global_relative_frame.lon
+    newpoint=LocationGlobalRelative(lat, lon, alt)
+    vehicle.simple_goto(newpoint, groundspeed=10)
+    # check that we made it to a safe height
+    while True:
+        currheight = vehicle.location.global_relative_frame.alt
+        if currheight > newpoint * 0.95 and currheight < newpoint * 1.05:
+		print("Reached target altitude")
+                break
+        time.sleep(1)
 
 def load_json(path2file):
     d = None
@@ -188,9 +225,21 @@ def main(path_to_config, ardupath=None):
             time.sleep(1)
 
     #   2. Sends the drones to their waypoints
+   # end the loop above (for v in vehicles)
 
+   waypointindex = 0
+   sort_by_height(vehicles, routes, waypointindex)
+   for vindex in range(len(vehicles)):
+       lat, lon, alt = routes[vindex][waypointindex] 
+       waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
+       vehicles[vindex].simple_goto(waypoint, groundspeed=10)
+
+
+   waypointindex +=1 
 
     #   3. Hopefully avoids collisions!
+
+
 
 
     # You're encouraged to restructure this code as necessary to fit your own design.
