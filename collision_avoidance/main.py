@@ -299,14 +299,14 @@ def main(path_to_config, ardupath=None):
     #   2. Sends the drones to their waypoints
    # end the loop above (for v in vehicles)
 
-   waypointindex = 0
-   sort_by_height(vehicles, routes, waypointindex)
-   for vindex in range(len(vehicles)):
-       lat, lon, alt = routes[vindex][waypointindex] 
-       waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
-       vehicles[vindex].simple_goto(waypoint, groundspeed=10)
+    waypointindex = 0
+    sort_by_height(vehicles, routes, waypointindex)
+    for vindex in range(len(vehicles)):
+        lat, lon, alt = routes[vindex][waypointindex] 
+        waypoint = LocationGlobalRelative(lat, lon, vehicles[vindex].location.global_relative_frame.alt)
+        vehicles[vindex].simple_goto(waypoint, groundspeed=10)
 
-   waypointindex +=1 
+    waypointindex +=1 
 
     #   3. Hopefully avoids collisions!
     
