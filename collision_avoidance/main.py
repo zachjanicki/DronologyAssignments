@@ -311,15 +311,15 @@ def main(path_to_config, ardupath=None):
             vehicles[vindex].simple_goto(waypoint, groundspeed=10)
         
         # Check if collisions occur
-        for vehicle in vehicles:
+        for i, vehicle in enumerate(vehicles):
             v1_curr = (vehicle.location.global_relative_frame.lat, vehicle.location.global_relative_frame.lon)
-            v1_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+            v1_goto = (routes[i][waypointindex][0], routes[i][waypointindex][1])
             v1 = (v1_curr, v1_goto)
-            target_altitude = routes[vehicle][waypointindex][2]
+            target_altitude = routes[i][waypointindex][2]
 
-            for colliding_vehicle in vehicles:
+            for j, colliding_vehicle in enumerate(vehicles):
                 v2_curr = (colliding_vehicle.location.global_relative_frame.lat, colliding_vehicle.location.global_relative_frame.lon)
-                v2_goto = (routes[vehicle][waypointindex][0], routes[vehicle][waypointindex][1])
+                v2_goto = (routes[j][waypointindex][0], routes[j][waypointindex][1])
                 v2 = (v2_curr, v2_goto)
                 
                 if not will_collide(v1, v2):
