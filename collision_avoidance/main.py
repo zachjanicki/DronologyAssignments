@@ -1,5 +1,6 @@
 import dronekit_sitl
 import dronekit
+from dronekit import LocationGlobalRelative
 import json
 import argparse
 import os
