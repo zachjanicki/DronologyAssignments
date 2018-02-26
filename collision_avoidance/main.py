@@ -9,7 +9,7 @@ import time
 import signal
 import util
 import logging
-import math
+from math import sin, cos, sqrt, atan2, radians
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.INFO)
